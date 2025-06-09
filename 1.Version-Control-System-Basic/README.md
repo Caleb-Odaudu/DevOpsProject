@@ -37,8 +37,50 @@ To start the initial project I first created the project repository with the inf
 
 ![Central repository](img.1/Central%20Repository.png)
 
-This showcases both Tom and Jerry using their individual laptop
+This showcases that Tom has logged into his own terminal
+![Tom logging in to his system](img.1/Toms-Config.png)
+
+This showcases that Jerry has logged into his own terminal
+![alt text](img.1/Jerry_Config.png)
+## Tom and Jerry Start Working:
+ Tom and Jerry both pull latest changes from the central repository
+![Pull request](img.1/Pull.png)
+ 
+Tom creates his `update-navigation` branch
+![Toms Branch](img.1/Tom_Branch.png)
+
+Jerry creates his `add-contact-info` branch
+![Jerry's Branch](img.1/Jerry_Branch.png)
+## Making Changes
+This part will show the changes jerry made aswell as the changes Tom made
+
+### Tom's Changes
+![Tom's Changes](img.1/Toms_Changes.png)
+### Jerry's Changes
+![Jerry's Changes](img.1/Jerrys_changes.png)
+## Merging Changes
+Before merging each developer needs to push their branch to the remote repository:
+
+### Tom pushing his branch
+![Toms Push](img.1/Toms_Push.png)
+### Jerry pushing his branch
+![Jerry-push](img.1/Jerrys_push.png)
 
 
+Tom wants to merge his changes first, so he creates a pull request (PR) from his branch `update-navigation` into the main using the command line:
+![Tom merge](img.1/Toms_Merge.png)
+The team reviews his changes and merges them into the main.
+
+Since Tom’s changes are now in , Jerry needs to update his branch before merging:
+![Jerry's Update](img.1/Jerry_update.png)
+
+If there are conflicts as showcased in the image above, Git will highlight them, and Jerry must resolve them manually in . Once fixed, he stages and commits the resolved file:
+![Conflict resolution](img.1/Conflict_res.png)
+
+Once everything is clean, Jerry pushes his branch and creates a PR:
+![Jerry's final Push](img.1/Jerry_Final.png)
+
+After review, his changes are merged into :
+![Merge](img.1/Toms_Merge.png)
 ## Conclusion
-Through this process, Tom and Jerry were able to work on the same file simultaneously, without overwriting each other's work Git tracked their changes, allowing them to merge their updates seamlessly into the main project. This illustrates the power of using VCS like Git for collaborative development, enshuring that all contributions are preserved and integrated efficiently and effectively.``
+Through this process, Tom and Jerry were able to work on the same file simultaneously, without overwriting each other's work Git tracked their changes, allowing them to merge their updates seamlessly into the main project. This illustrates the power of using VCS like Git for collaborative development, enshuring that all contributions are preserved and integrated efficiently and effectively.
