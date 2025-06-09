@@ -37,6 +37,11 @@ To start the initial project I first created the project repository with the inf
 
 ![Central repository](img.1/Central%20Repository.png)
 
+I have create the Root Github Repository using the terminal. This is what it looks like on the dashboard
+![Dashboard](img.1/Dashboard.png)
+
+In the image you can see that an index.html has been created.
+
 This showcases that Tom has logged into his own terminal
 ![Tom logging in to his system](img.1/Toms-Config.png)
 
