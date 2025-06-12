@@ -37,6 +37,17 @@ Checking the status to see if we need to add any files,then we commit with a mes
 
 ## Part 2: Simultating Tom and Jerry's Work
 To simulate both Tom and Jerry's work on the same laptop, you'll switch between two branches, making changes as each character
+ 
+### Set-Up
+Before moving into the work it is important to configure the user names and email this allows us to showcase that Tom or Jerry did the following work.
+
+Tom's Set-Up
+
+![Tom_Config](img.2/Tom_Config.png)
+
+Jerry's Set-UP
+
+![Jerry_Config](img.2/Jerry's_Config.png)
 
 ### Tom's Work
 First thing to do is to navigate to the project directory you just cloned
@@ -110,8 +121,10 @@ This command stages the changes Jerry made to the index.html file, preparing the
 
 ![Jerry_Commit](img.2/Commit_jerry.png)
   
-In this image I have commit Jerry's changes in the branch history, with a message describing what was done. After we Push the branch to GitHub. This command uploads Jerry's branch to the GitHub repository, making it available for review and merging into the main project. 
+In this image I have commit Jerry's changes in the branch history, with a message describing what was done. After we Push the branch to GitHub. This command uploads Jerry's branch to the GitHub repository, making it available for review and merging into the main project.
 
+After review, his changes are merged into :
+![Merge](img.2/Toms_Merge.png)
 ## Conclusion
 
 So far you have experienced collaboration between Tom and Jerry. But thats not all. Someone needs to review their work merge the changes to the main project, and resolve conflict if any. In the next project, we will see how that works.
