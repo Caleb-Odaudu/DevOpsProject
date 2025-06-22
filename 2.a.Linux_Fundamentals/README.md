@@ -207,4 +207,4 @@ sudo apt remove htop
 ![Remove_htop](img/remove_htop.png)
 
 ## Conclusion
-This is the conclusion to this project, this project sets up a foundation for future projects using linx
+This concludes the project. You have set up a solid foundation for working with Linux, including installing and managing software, connecting to remote servers, and understanding key Linux concepts. With these fundamentals, you are well-prepared for future projects. As a next step, consider exploring topics such as shell scripting, file permissions, or basic networking commands to deepen your Linux skills.
