@@ -8,94 +8,83 @@ This guide covers advanced Linux commands and concepts, focusing on file permiss
 
 ## File Permissions and Access Rights
 
-In Linux, managing file permissions and ownership is a vital for controlling who can access, modify, or execute files and directories. Understanding these concepts allows you to maintain the security and integrity of your system. 
+In Linux, managing file permissions and ownership is vital for controlling who can access, modify, or execute files and directories. Understanding these concepts allows you to maintain the security and integrity of your system.
+
 ### Numeric Representation and Permissions
-In Linux, Permissions are represented using numeric values. Each permission **(no permission, read, write, and execute)** is assigned a numeric value:
+
+In Linux, permissions are represented using numeric values. Each permission (**no permission, read, write, and execute**) is assigned a numeric value:
 
 - **r** (read): Permission to view the contents. The numeric value is **4**
 - **w** (write): Permission to modify the contents. The numeric value is **2**
 - **x** (execute): Permission to run the file as a program or script. The numeric value is **1**
-- **-**(no permission): Permission is not given. The numeric value is **0**
+- **-** (no permission): Permission is not given. The numeric value is **0**
 
-These values are combined to represent the pemissions for each user class. Lets consider a few examples
+These values are combined to represent the permissions for each user class. Let's consider a few examples:
 
-- **Permissions Reprecented by 7**
-    - 4(read) + 2(write) + 1(execute)
-
-    - Symbolic:rwx
-
+- **Permissions Represented by 7**
+    - 4 (read) + 2 (write) + 1 (execute) = 7
+    - Symbolic: rwx
     - Meaning: Read, write, and execute permissions are all granted.
+    - Example Context: A script file that the owner needs to read, modify, and execute.
+    - Note: It is not recommended to give 'rwx' permissions to group or others on Linux files or directories. This can lead to security risks, such as unauthorized changes or execution of files.
 
-    - Example Context: A script file that the owner needs to read, modify, and execute
-
-    - Note: It is not recommended to give 'rwx' permissions to group or others on Linux files or directories. This can lead to security risks, such as unauthorised changes or execution of files.
-
-- **Permission Represented by 5** 
-    - 4(read) + 1(execute)= 5
-
+- **Permission Represented by 5**
+    - 4 (read) + 1 (execute) = 5
     - Symbolic: r-x
-
-    - Meaning: Read and execute permissions are granted, but write permission is not
-
-    - Example Context: A shared libary or command tool that users can execute and read but not modify
+    - Meaning: Read and execute permissions are granted, but write permission is not.
+    - Example Context: A shared library or command tool that users can execute and read but not modify.
 
 - **Permissions Represented by 6**
-    - 4(read) + 2(write)=6
-
-    - Symbolic: rx-
-    
-    - Meaning; Read and write permissions are granted, but execute permissions is not.
-
-    - Example Context: A document or a configuration filr that the owner needs to read and modify but not execute.
+    - 4 (read) + 2 (write) = 6
+    - Symbolic: rw-
+    - Meaning: Read and write permissions are granted, but execute permission is not.
+    - Example Context: A document or a configuration file that the owner needs to read and modify but not execute.
 
 ### Understanding User Classes from a Permission Perspective
 
-It is important to understand the consept of 'user classes' in the context of Linux permissions. Think of user classes as categories of users that Linux recognises when deciding who can do what with a file. There are three main classes:
+It is important to understand the concept of 'user classes' in the context of Linux permissions. Think of user classes as categories of users that Linux recognizes when deciding who can do what with a file. There are three main classes:
 
-- **Owner**: The user who owns the file. Often referred to as 'user'
-
+- **Owner**: The user who owns the file. Often referred to as 'user'.
 - **Group**: Users who are part of the file's group. They share certain permissions for the file.
-
 - **Others**: All other users.
 
 #### The Role of Hyphen (-) in Permission Representation
 
-When discussing permissions, you might notice hyphen (-) being mentioned. In the context of Linux file permissons, a hyphen doesn't actually represents a user class. Instead, it's used in the sybolic representation of permissions to show the absence of permissions
+When discussing permissions, you might notice hyphens (-) being mentioned. In the context of Linux file permissions, a hyphen doesn't actually represent a user class. Instead, it's used in the symbolic representation of permissions to show the absence of permissions.
 
 Run `ls -latr`
 
 ![Ls_latr](img/ls--latr.png)
 
-The Orderthe user class is represented is as follow:
-- The first hyphen "-" is the **user**
-
-- The second hyphen "-" is the **group**
-
-- The third hyphen "-" is **others**
+The order the user class is represented is as follows:
+- The first set (after the file type) is the **user**.
+- The second set is the **group**.
+- The third set is **others**.
 
 ---
 
 ## File Permission Commands
+
 To manage file permissions and ownership, Linux provides several commands:
 
 ### chmod command
 
-The `chmod` command allows you to modify file permissions. You can use both symbolic and numeric representations to assign permissions to the user,group, and others
+The `chmod` command allows you to modify file permissions. You can use both symbolic and numeric representations to assign permissions to the user, group, and others.
 
-Lets see an example.
+Let's see an example.
 
-Create an empty file using the `touch` command
+Create an empty file using the `touch` command:
 ~~~
 touch script.sh
 ~~~
 
-Check the permission of the file
+Check the permission of the file:
 
 ![Touch permissions](img/touch_perm.png)
 
-This means the owner has the read and write permissions, The group has the read and write permissions and the other has only the read permissions.
+This means the owner has the read and write permissions, the group has the read and write permissions, and others have only the read permissions.
 
-Now lets update the permission so that all the user classes will have execute permissions
+Now let's update the permission so that all the user classes will have execute permissions:
 
 ~~~
 chmod +x script.sh
@@ -103,47 +92,45 @@ chmod +x script.sh
 
 The above command uses the chmod command with the `+x` option to grant execute permissions to the file `script.sh`. The `+x` option adds the execute permission to the existing permissions for all the user classes.
 
-Now lets check what the file permissions look like
+Now let's check what the file permissions look like:
 
 ![Chmod_x](img/chmod_x.png)
 
-This gives the execute permission to all to all roles.
+This gives the execute permission to all roles.
 
-The same command can be executed to achieve the same result using the numbers approach.
+The same can be achieved using the numeric approach:
 
 ~~~ 
 chmod 755 script.sh
 ~~~
 
-To add execute to all (user,group, others) you would add 1 to each of the three categories, resulting in 755:
+To add execute to all (user, group, others) you would add 1 to each of the three categories, resulting in 755:
 
-- (4+2+1)= 7 for the user (read,write, and execute),
+- (4+2+1) = 7 for the user (read, write, and execute)
+- (4+1) = 5 for the group (read and execute)
+- (4+1) = 5 for others (read and execute)
 
-- (4+1)= 5 for the group (read and execute),
-
-- (4+1)= 5 for others (read and execute),
-
-Now another example, Imagine the owner of a file is currently the only one with full permissions to `note.txt`
+Another example: Imagine the owner of a file is currently the only one with full permissions to `note.txt`:
 
 ~~~
 touch note.txt
 ~~~
 
-To allow group members and other to read, write, and execute the file, change it to the -rwxrwxrwx permission type, whose numeric value is 777
+To allow group members and others to read, write, and execute the file, change it to the -rwxrwxrwx permission type, whose numeric value is 777:
 
 ~~~
 chmod 777 note.txt
 ~~~
 
-Check the output
+Check the output:
 
 ![Chmod_777](img/chmod_777.png)
 
-**Notes**: The first dash (-) represents the file type and not a user class. It indicates that the entry is a regular file.
+**Note**: The first dash (-) represents the file type and not a user class. It indicates that the entry is a regular file.
 
 ### chown command
 
-The chown command allows you to chage the ownership of files, directories, or symbolic links to a specified username or group.
+The `chown` command allows you to change the ownership of files, directories, or symbolic links to a specified username or group.
 
 Here's the basic format:
 
@@ -151,36 +138,31 @@ Here's the basic format:
 chown [option] owner[:group] file(s)
 ~~~
 
-For example, lets assume there is a user on the server calles **John**, a group on the server called **developers** and you want the owner of **filename.txt** changed from **ubuntu** to **john**, and to also ensure that any user in the developer group has ownership of the file as well:
+For example, let's assume there is a user on the server called **john**, a group on the server called **developers**, and you want the owner of **filename.txt** changed from **ubuntu** to **john**, and to also ensure that any user in the developer group has ownership of the file as well:
 
 The command would look like this:
 ~~~
-chown john:developer filename.txt
+chown john:developers filename.txt
 ~~~
 
-It gives the response
-~~~
-chown: invalid user: ‘john:developer’
-~~~
+If either john isn't a valid user or developers isn't a valid group, you'll get an "invalid user" error.
 
-This is because the command is trying to change the ownership of filename.txt to the user john and the group developer. But if either john isn't a valid user or developer isn't a valid group, you'll get that "invalid user" error.
+## Superuser Privileges
 
-## Superuser Priviledges
+It is often necessary to become the superuser to perform important tasks in Linux, but as we know, we should not stay logged in as the superuser. In most Linux distributions, there is a command that can give you temporary access to superuser privileges. This program is called sudo (short for superuser do) and can be used in those cases when you need to be the superuser for a small number of tasks. To use superuser privileges, simply type `sudo` before the command you will be invoking.
 
-It is often necessary to become the superuser to perform important task in linux, but as we know, we should not stay logged in as the superuser. In most linux distributions, there is a command that can give you temporary access to the superuser priviledge. This program is called sudo (short for super user) and can be used in those cases when you need to be the superuser for a small numbers of task. To use the superuser priviledges, simply type `sudo` before the command you will be invoking
-
-To switch to the root user, simply run 
+To switch to the root user, simply run:
 ~~~
 sudo -i
 ~~~
 
-You can type `exit` to leave the shell
+You can type `exit` to leave the shell.
 
 ![sudo-i](img/sudo-i.png)
 
-## User Managemnt on Linux
+## User Management on Linux
 
-As a DevOps engineer, you are also going to be doing systems administrations which involves managing different users on the servers. You should know how to create a new user, ot group, modify their permissions, update password and such similar tasks.
+As a DevOps engineer, you are also going to be doing systems administration, which involves managing different users on the servers. You should know how to create a new user or group, modify their permissions, update passwords, and perform similar tasks.
 
 ### Create a User
 
