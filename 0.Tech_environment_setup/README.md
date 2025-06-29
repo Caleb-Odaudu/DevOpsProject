@@ -86,7 +86,16 @@ On the website, click "Download" to download the Git installer for Windows.
 
 * **Launch Git**: Open from the Start Menu, use the desktop shortcut, or simply type "git" in the Windows app search.
 
-![Git](img/Git.png)
+* **Verify Git Installation**:  
+  - Open Git Bash (or Command Prompt).
+  - Type the following command and press Enter:
+    ~~~
+    git --version
+    ~~~
+  - You should see output similar to `git version 2.xx.x.windows.x`, confirming that Git is installed correctly.
+
+![Git_Version](img/Git_Version.png) <!-- Add a screenshot showing the output of git --version -->
+
 ### Troubleshooting Tips
 - **Installer Won't Launch:**  
   - Ensure the file is fully downloaded.
