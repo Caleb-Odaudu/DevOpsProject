@@ -101,24 +101,24 @@ On the website, click "Download" to download the Git installer for Windows.
 - **Permission Errors:**  
   - Run the terminal or Git Bash as administrator if you encounter permission issues.
 
-## Virtual Box 
+## VirtualBox
 
 VirtualBox is a free, open-source software that allows you to run multiple operating systems on a single computer by creating virtual machines. It acts like a simulated computer within your actual computer, letting you install and use systems like Linux, Windows, or macOS without affecting your main setup. This is especially useful for testing software, learning new operating systems, or running apps that only work on a specific platform. Each virtual machine operates independently, with its own virtual hardware, and you can easily switch between them or delete them without risk to your main system.
 
 ### Windows installation
-- **Downloa Virtual box**: Go to Oracle virtual box website (https://www.virtualbox.org/wiki/Downloads)
+- **Download VirtualBox**: Go to the Oracle VirtualBox website (https://www.virtualbox.org/wiki/Downloads)
 
 ![Virtual Box installation](img/Virtualbox_Download.png)
 
-Select the Windows hosr version
+Select the Windows host version.
 
 - **Run installer**: Locate the downloaded .exe file, double-click to run the installer.
 
-- **Wizard**: Click "Next" through the installation wizard. Click next to all the remaining prompt, leave every option to default.
+- **Wizard**: Click "Next" through the installation wizard. Click next to all the remaining prompts, leaving every option at default.
 
-- **Install Virtual**: Lastly, click install to complete the installation. When installation is complete click FINISH to complete the installation.
+- **Install VirtualBox**: Lastly, click Install to complete the installation. When installation is complete, click FINISH to complete the installation.
 
-- **Launching Virtual box**: Open from the Start Menu, use the desktop shortcut, or simply type "Virtual box" in the Windows app search.
+- **Launching VirtualBox**: Open from the Start Menu, use the desktop shortcut, or simply type "VirtualBox" in the Windows app search.
 
 ![Virtualbox](img/Virtual_Box.png)
 
@@ -154,20 +154,19 @@ Select the Windows hosr version
 
 If you continue to experience problems, consult the [VirtualBox User Manual](https://www.virtualbox.org/manual/UserManual.html) or visit the [VirtualBox forums](https://forums.virtualbox.org/).
 
-### Ubuntu (Linux Distro) on Virtual box (Windows Host)
-- **Download Ubuntu Desktop ISo file**: Go to Ubuntu official website
+### Ubuntu (Linux Distro) on VirtualBox (Windows Host)
+- **Download Ubuntu Desktop ISO file**: Go to the Ubuntu official website.
 ![Ubuntu](img/Ubuntu_download.png)
 
-- **Virtual Box**: Launch your already installed VirtualBox application on your computer. This is the program that will allow you to create and manage virtual machines.
+- **VirtualBox**: Launch your already installed VirtualBox application on your computer. This is the program that will allow you to create and manage virtual machines.
 
 - **Create a New Virtual Machine**: To create a new VM, click on the "NEW" button or the plus symbol at the top center of the VirtualBox window. This will start the process of setting up a new virtual machine for Ubuntu.
 
-- **Configure the virtual machine**: Choose Linux as the type and Ubuntu as the version. Allocate at least 2GB of RAM for the virtual machine. Cteate a virtual hard disk, choosing either dynamic or fixed size -dynamic recommended-.
+- **Configure the virtual machine**: Choose Linux as the type and Ubuntu as the version. Allocate at least 2GB of RAM for the virtual machine. Create a virtual hard disk, choosing either dynamic or fixed size—dynamic recommended.
 
-- **Select an installation file**: Choose the ubuntu .iso file that we downloaded from ubuntu website.
+- **Select an installation file**: Choose the Ubuntu .iso file that you downloaded from the Ubuntu website.
 
-- **Start the Virtual Machine**:Launch the virtual machine and start the Ubuntu installation process.
-
+- **Start the Virtual Machine**: Launch the virtual machine and start the Ubuntu installation process.
 
 - **Install Ubuntu**: When the Ubuntu installer appears, select your language and click "Install Ubuntu." Follow the on-screen instructions to choose your keyboard layout, select "Normal installation," and check "Download updates while installing Ubuntu." Choose "Erase disk and install Ubuntu" (this only affects the virtual disk), and enter your name, computer name, username, and password when prompted.
 
@@ -175,43 +174,42 @@ If you continue to experience problems, consult the [VirtualBox User Manual](htt
 
 ![Ubuntu](img/Ubuntu.png)
 
+## Creating GitHub and AWS Accounts
+Please note that account creation has nothing to do with the type of OS that you use, since you are dealing with third-party services.
 
-## Creating Github and AWS Account
-Please note that account creation has nothing to do with the type of OS that you use, since you are dealing with third-party erbs
+### GitHub account
 
-### Github account
-
-- **Visit the Github Website**: https://github.com/
+- **Visit the GitHub Website**: https://github.com/
 
 ![Github](img/Github.png)
 
-- **Sign Up**: On the GitHub homepage, you will find a 'Sign up' button. Click on it
+- **Sign Up**: On the GitHub homepage, you will find a 'Sign up' button. Click on it.
 
-- **Enter Your Information**: Fill out the required information on the Sign up page. This typically includes your username, email adress, and password. Choose a dtrong and secure password.
+- **Enter Your Information**: Fill out the required information on the Sign up page. This typically includes your username, email address, and password. Choose a strong and secure password.
 
-- **Verify your email**: After entering your information, Github will ask you to verify your email address. Check your emailinbox for a verification message from GitHub and click on the verification link.
+- **Verify your email**: After entering your information, GitHub will ask you to verify your email address. Check your email inbox for a verification message from GitHub and click on the verification link.
 
-- **Complete the CAPTCHA**: Github may ask you to complete a CAPTCHA to ensure that you are not a robot. Follow the instruction to prove you're a human.
+- **Complete the CAPTCHA**: GitHub may ask you to complete a CAPTCHA to ensure that you are not a robot. Follow the instructions to prove you're a human.
 
-- **Choose a Plan**: Github offers free plans for public repositories and paid plans for private repositories. Choose the plan that best suits your needs.
+- **Choose a Plan**: GitHub offers free plans for public repositories and paid plans for private repositories. Choose the plan that best suits your needs.
 
-- **Tailor Your Experience(Optional)**: Github may ask you to answer a few questions to tailor your experience. You can choose to answer them or skip this step. GitHub may ask you to answer a few questions to tailor your experience. You can choose to answer them or skip this step.
+- **Tailor Your Experience (Optional)**: GitHub may ask you to answer a few questions to tailor your experience. You can choose to answer them or skip this step.
 
-- **Welcome to Github**: Once you've completed the above steps, you should be redirected to your new GitHub account. You now have a GitHub account.
+- **Welcome to GitHub**: Once you've completed the above steps, you should be redirected to your new GitHub account. You now have a GitHub account.
 
 - **Explore GitHub**: Take some time to explore the GitHub platform. Familiarize yourself with the interface, and you can start by creating a new repository if you have a project in mind.
 
 ![GitHub_signin](img/GitHub_Account.png)
 
-### Amazon Web Service (AWS) Account
+### Amazon Web Services (AWS) Account
 
-- **Visit the AWS Free Tier Page**: Go to the AWS free tier page at AWS website to learn about the services available in the free tier and to start the signup process (https://aws.amazon.com/console/)
+- **Visit the AWS Free Tier Page**: Go to the AWS free tier page at the AWS website to learn about the services available in the free tier and to start the signup process (https://aws.amazon.com/console/)
 
 ![AWS_Signin](img/AWS_Sign.png)
 
-- **Create an AWS Account**: On the AWS free tier page click on the 'Create an AWS Account' button.
+- **Create an AWS Account**: On the AWS free tier page, click on the 'Create an AWS Account' button.
 
-- **Provide account information** Fill in the necessary account information, including yout contact information and payment details. Note that you'll be required to provide valid credit card information. even though you won't be charged unless you exceed the free teir limits. You will be required to have a minimum of 1 usd in your card.
+- **Provide account information**: Fill in the necessary account information, including your contact information and payment details. Note that you'll be required to provide valid credit card information, even though you won't be charged unless you exceed the free tier limits. You will be required to have a minimum of $1 USD on your card.
 
 - **Verify your identity**: Follow the steps to verify your identity. This may involve receiving a phone call or entering a verification code sent to your email or phone.
 
@@ -223,11 +221,10 @@ Please note that account creation has nothing to do with the type of OS that you
 
 - **Wait for approval**: It might take a short while for your account to be approved. Once approved, you'll receive a confirmation email.
 
-- **Access the AWS Management Console**: After receiving confirmation, log in to the AWS Management Console using new account credentials.
+- **Access the AWS Management Console**: After receiving confirmation, log in to the AWS Management Console using your new account credentials.
 
-- **Explore the AWS Free Tier services**: AWS offers a variety of services within the free tier, including EC2 (Elastic Compute Cloud), S3 (Simple Storage Service), and more. Make sure to explorw and understand the limitation of each service within the free tier.
+- **Explore the AWS Free Tier services**: AWS offers a variety of services within the free tier, including EC2 (Elastic Compute Cloud), S3 (Simple Storage Service), and more. Make sure to explore and understand the limitations of each service within the free tier.
 
 ![AWS_Login](img/AWS_login.png)
-
 
 ![AWS-Console](img/AWS_Console.png)
