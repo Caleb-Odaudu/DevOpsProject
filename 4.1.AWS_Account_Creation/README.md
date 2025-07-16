@@ -41,3 +41,44 @@ AWS democratizes access to powerful tools, once exclusive to large enterprises â
 
 ---
 
+## Setting Up An AWS Account
+
+1. Open the [AWS account creation page](https://portal.aws.amazon.com/billing/signup).
+2. Click on <u>Create an AWS Account</u>.
+3. Enter the required details:
+   - **Email address**
+   - **Password**
+   - **AWS account name**
+   - Then click <u>Verify email address</u>.
+4. Check your email inbox.
+   - You'll receive a verification code. **Copy** the code.
+5. Paste the verification code in the required field and click <u>Verify</u>.
+6. Once your email is verified:
+   - Set your **Root user password**.
+   - Click <u>Continue</u>.
+7. Enter your **Personal Information** and click <u>Continue</u>.
+8. Provide your **payment information** for verification.
+   - *You will not be charged unless your usage surpasses the* <u>AWS Free Tier limits</u>.
+   > Some banks may authorize a nominal charge (about $1.00) to validate your card, which is usually reversed shortly.
+   - Click <u>Verify and continue</u>.
+9. A **One Time Password (OTP)** will be sent to your phone for verification.
+   - Make sure you have access to the provided phone number.
+   - Enter the OTP to proceed.
+10. Choose your preferred method to receive a verification code:
+    - **Text message (SMS)** or **Voice call**
+    - Complete the CAPTCHA and click <u>Send</u>.
+11. On the **Select a support plan** page, choose a plan.
+    - The **Basic support â€“ Free** option is recommended.
+    > Review the details of each plan before making a selection.
+12. Your AWS account is now created!
+    - Click on <u>Go to the AWS Management Console</u> to access your account.
+13. After setup, sign in to the AWS Management Console:
+    - Click <u>Sign in to the console</u>.
+    - Select <u>Root user</u> and enter your registered email address.
+    - Click **Next**.
+    - If prompted, complete the CAPTCHA and click **Submit**.
+    - Enter your **root password** and click **Sign In**.
+
+> **Tip:** Always keep your AWS root credentials secure and enable Multi-Factor Authentication (MFA) for added security.
+
+This completes the AWS account creation and login process.
