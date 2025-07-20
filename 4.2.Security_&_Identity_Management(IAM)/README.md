@@ -113,4 +113,183 @@ Considering **Zappy e-Bank's** plan ot expand its team with 10 more developers a
 
 ### Create policy for the Data Analyst team
 
-Repeat the process above for the Data
+Repeat the process above for the Data Analysts team, but instead of **EC2**, search for **S3**. Also name the policy **analyst**, instead of **developers**. You can give it any description of your choice.
+
+![Analyst Polict creation](img/analyst_Policy.png)
+
+### Create Group for the Development team
+
+1. In the IAM console navigation, select **User group** and in the top right click **Create group**
+
+![Create group](img/usergroup.png)
+
+2. Provide a name for the group.
+
+![Name of group](img/Group_name_dev.png)
+
+3. Attach the developer policy we created earier to the group. This will allow any user in the **Development-Team** group to have access to EC2 instances alone.
+
+![developer permission](img/dev_permiss_group.png)
+
+4. You have successfully created a group and attached to a permission policy for any user added to the group to have access to the EC2 instance only. Recall that users in this group will be backend developers only
+
+### Create Group for the Data Analyst team
+
+Repeat the process above for the Data Analyst team.
+
+1. The group name should be Analyst-Team
+
+2. Instead of attaching developers policy, attach analyst policy.
+
+![Analyst_Team](img/Analyst_Team.png)
+
+> Recall that you only allowed S3 access for this policy. So any user in this group will have access to S3 access to S3 Services. In our case, our users will be the data analysts.
+
+### Creating IAM User for John
+
+Let's recall that John is a backend developer, therefore he needs to be added as a user to the **Developer-Team** group.
+
+1. Navigation to the IAM dashboard, select 'Users' and then click 'Create User'
+
+![Create_User](img/Create_User.png)
+
+2. Provide a name of the User. and ensurethat the user can access the AWS Management Console
+
+![Username_John](img/User_Name_John.png)
+
+3. Add John to the development team group
+
+![Permission](img/User_Permission_Jo.png)
+
+4. Click on Create User
+
+![Create_User](img/Create_User_final.png)
+
+5. Download the login credentials for John
+
+![Retrieve_Password](img/retrieve_Password.png)
+
+### IAM Configuration for Mary – Data Analyst
+
+#### Task: Create IAM User
+
+1. **Go to IAM Console**
+   - Navigate: AWS Console → IAM → Users → Create User
+
+   ![Create User](img/Create_User.png)
+
+2. **Create User: Mary**
+   - Username: `Mary`
+   - Console Access: Enabled
+
+   ![UserNameMary](img/User_Name_Mary.png)
+
+
+
+3. **Assign Group**
+   - Add Mary to group: `Analyst-Team`
+   - Permissions: Group should have `analyst` policy (S3 access only)
+
+   ![User_Permission_Analyst](img/User_Permis_Mary.png)
+
+
+4. **Save Credentials**
+   - Download or securely store login credentials for Mary
+   
+   ![alt text](img/crednti-Mary.png)
+---
+
+### Testing and Validation – IAM User Setup
+
+#### Testing John's Access
+
+- **Login as John**: Use the credentials provided to John to log into the AWS Management Console. This simulates John's user experience and ensures he has the correct access.
+
+![Login-as-John](img/Login-as-John.png)
+
+- **Access EC2 Dashboard**: Navigate to the EC2 dashboard within the AWS Management Console. John should be able to view, launch, and manage EC2 instances as his role requires access to servers for deploying and managing backend applications.
+![John-Console](img/John_console.png)
+
+- **Perform EC2 Actions**: Attempt to create a new EC2 instance or modify an existing one to confirm that John has the necessary permissions. If John can successfully perform these actions, it indicates his IAM user has been correctly set up with the appropriate policies for a backend developer.
+
+![Johnec2Instance](img/JohnEC2Instance.png)
+
+#### Testing Mary's Access
+
+- **Login as Mary**: Use the credentials provided to Mary to log into the AWS Management Console. This ensures that Mary's user experience is as expected and that she has the correct access.
+
+![Login As Mary](img/logInAsMary.png)
+
+- **Access S3 Dashboard**: Navigate to the S3 dashboard within the AWS Management Console. Mary should be able to view, create, and manage S3 buckets as her role requires access to data storage for analyzing and managing data.
+
+![Mary_S3](img/Mary_S3.png)
+
+- **Perform S3 Actions**: Try to create a new S3 bucket or upload data to an existing bucket to verify that Mary has the necessary permissions. Successful execution of these tasks will confirm that Mary's IAM user has been properly set up with the appropriate policies for a data analyst.
+
+![alt text](img/Mary_Bucket.png)
+
+### Validating Group Policies
+
+For both users, ensure that their access is confined to their role-specific resources (EC2 for John and S3 for Mary) and that they cannot access other AWS services beyond what their group policies permit. This validation ensures adherence to the principle of least privilege, enhancing security by limiting access to only what is necessary for each user's role.
+![alt text](img/Mary-unautorised.png)
+
+### Implement Multi-Factor Authentication (MFA)
+
+Multi-Factor Authentication (MFA) is a security feature that adds an extra layer of protection to your AWS account and resources. With MFA enabled, users must provide two or more forms of authentication before accessing AWS services.
+
+John, the backend developer, logs into the AWS Management Console to access EC2 instances for deploying and testing his code. To enhance security, Zappy e-Bank requires John to use MFA alongside his regular username and password.
+
+When John attempts to log in, after entering his credentials, AWS prompts him for a one-time code generated by an MFA device.
+
+---
+
+#### Setting Up MFA for John
+
+1. Navigate to **IAM Console → Users**, then click on **John** 
+
+![alt text](img/mfa1.png)
+
+2. Click **Enable MFA**
+
+![Assign MFA](img/assignMFA.png)
+
+3. Enter a device name (e.g., `John-MFA`) and select **Authenticator App**
+![JohnMFA](img/MFA2.png)
+
+4. Install an authenticator app like **Google Authenticator** or **Microsoft Authenticator** if it's not already on your device
+
+
+5. Click **Next**
+
+
+6. Open the authenticator app and **scan the QR Code**
+
+![MFA£](img/MFA£.png)
+
+7. Enter **two consecutive codes** shown in the app
+
+![MFA4](img/MFA4.png)
+
+8. Click **Assign MFA**
+
+MFA is now enabled for John ✅
+
+---
+
+## 🛠️ Setting Up MFA for Mary
+
+Repeat the exact steps listed for John, but this time for **Mary**, the data analyst.
+
+---
+
+## Summary: IAM & The Principle of Least Privilege
+
+This project demonstrates how to securely manage user access in AWS using Identity and Access Management (IAM). By creating specific policies and user groups for backend developers and data analysts, each user receives only the permissions necessary for their role—developers can access EC2, analysts can access S3, and no one has unnecessary access to other services.
+
+This approach follows the **principle of least privilege**, which means granting users the minimum level of access required to perform their tasks. Applying this principle reduces security risks, prevents accidental changes, and protects sensitive data by ensuring users cannot access resources beyond their responsibilities.
+
+> **Tip:** Always review and update IAM policies regularly to maintain least privilege and adapt to changing team roles.
+
+---
+
+
