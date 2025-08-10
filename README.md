@@ -20,5 +20,8 @@ This repository showcases projects I have done for DevOps.
 - [3.e.Working_with_function-&_arrays_in_shell_scripting](3.e.Working_with_function-&_arrays_in_shell_scripting/README.md): Using functions and arrays in shell scripting for modular, maintainable automation.
 - [4.01.Introduction_to_cloud_computing](4.01.Introduction_to_cloud_computing/README.md): Introduction to cloud computing, deploying an e-commerce site on AWS EC2, and CI/CD workflow.
 - [4.1.AWS_Account_Creation](4.1.AWS_Account_Creation/README.md): Guide to AWS account creation and the importance of cloud computing.
+- [4.2.AWS_EC2](4.2.AWS_EC2/README.md): Step-by-step guide to launching and managing EC2 instances on AWS.
+- [4.3.AWS_S3](4.3.AWS_S3/README.md): Hands-on project for creating, configuring, and managing S3 buckets, including lifecycle policies and bucket policies.
+- [4.4.VPC](4.4.VPC/README.md): Comprehensive guide to AWS VPC, including subnets, route tables, gateways, NAT, and VPC peering.
 
 ---
