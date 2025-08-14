@@ -526,22 +526,34 @@ vi wordpress.env
 In this .env file I will input
 ~~~
 # VPC and Networking
-export VPC_ID=vpc-xxxxxxxx
-export IGW_ID=igw-yyyyyyyy
-export NAT_GW_ID=nat-zzzzzzzz
-export EIP_ALLOC_ID=eipalloc-12345678
+export VPC_ID=vpc-0239c1cb81a3b1383
+export IGW_ID=igw-0a923283311fb496c
+export NAT_GW_ID=nat-08fa4c8b56b879e86
+export EIP_ALLOC_ID=eipassoc-065360fab0bbae844
 
 # Subnets
-export PUBLIC_SUBNET_1=subnet-aaaaaaa
-export PUBLIC_SUBNET_2=subnet-bbbbbbb
-export PRIVATE_APP_SUBNET_1=subnet-ccccccc
-export PRIVATE_APP_SUBNET_2=subnet-ddddddd
-export PRIVATE_DB_SUBNET_1=subnet-eeeeeee
-export PRIVATE_DB_SUBNET_2=subnet-fffffff
+export PUBLIC_SUBNET_1=subnet-0804a75cd26a953cd
+export PUBLIC_SUBNET_2=subnet-0114856ecf1972d61
+export PRIVATE_APP_SUBNET_1=subnet-0f7ef1099512ef0d6
+export PRIVATE_APP_SUBNET_2=subnet-0c227a0ce1c266544
+export PRIVATE_DB_SUBNET_1=subnet-05eb9ee5539fc4256
+export PRIVATE_DB_SUBNET_2=subnet-099605ef983c5c6ea
 
 # Other Resources
-export LAUNCH_TEMPLATE_ID=lt-77777777
-export ASG_NAME=wordpress-asg
+export LAUNCH_TEMPLATE_ID=lt-0620e905fd66244dd
+export ASG_NAME=DigitalBoost_ASG
+
+
+# Security Group
+export DB_SG_ID=sg-016c5855d406b4c8c
+
+
+# Route Tables
+export PUBLIC_RT_ID=rtb-0d3e8f5a698d745b2
+export PRIVATE_RT_ID=rtb-08f123827050464e4
+
+
+
 ~~~
 ![wordpress.env](img.1/3.c.wordpress.env.png)
 
@@ -941,3 +953,24 @@ fi
 
 ![Create RDS](img.1/3.h.create-RDS.png)
 
+## Configure WordPress to Use RDS
+
+1. Retrieve the RDS Endpoint
+
+    Once the RDS status is `available` , run:
+~~~
+aws rds describe-db-instances \
+  --db-instance-identifier wordpress-db \
+  --query 'DBInstances[0].Endpoint.Address' \
+  --output text
+~~~
+
+Save the output — this is your `DB_Host` .
+
+wordpress-db.csrgcouua1xy.us-east-1.rds.amazonaws.com
+
+2. SSH into EC2 via Bastion Host
+
+~~~
+ssh -i your-key.pem ec2-user@<bastion-public-ip>
+~~~
