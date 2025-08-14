@@ -471,3 +471,273 @@ For best practice, the wordpress EC2 instance should not be directly exposed to 
 - Protocol/Port: HTTP on port 80
 - VPC: Select the one where your EC2 instances will live
 - Health checks: Use / or /wp-login.php for WordPress
+
+> From This Point on I will be transitioning to AWS CLI because there are many benefits such as:
+
+- Scriptability: Automate repetitive tasks (e.g., provisioning, updates, teardown)
+- Documentation: Your CLI commands become part of your project’s reproducible workflow
+- Speed: Faster than clicking through the console
+- Modularity: Easily integrate with shell scripts or CI/CD pipelines
+- Consistency: Avoid human error from manual configuration
+
+## Configure GitBash to AWS CLI
+
+1. Ensure AWS CLI is installed 
+~~~
+aws --version
+~~~
+
+2. Configure Your Credentials
+
+~~~ 
+aws configure
+~~~
+You’ll be prompted for:
+- Access Key ID
+- Secret Access Key
+- Default region (e.g., us-east-1)
+- Output format (recommend json or table)
+
+![AWS configure](img.1/3.a.aws_configure.png)
+
+3. Create Project Directory 
+
+~~~
+mkdir wordpress-aws-cli
+cd wordpress-aws-cli
+touch setup-alb.sh
+~~~
+
+4. Run CLI Commands in Git Bash
+Here’s an example to describe your VPCs:
+~~~
+aws ec2 describe-vpcs --output table
+~~~
+![VPC_Table_Format](img.1/3.b.VPC_table_format.png)
+
+
+5. Use Environment Variables for Modularity
+
+Create a .env file:
+~~~
+vi wordpress.env
+~~~
+
+In this .env file I will input
+~~~
+# VPC and Networking
+export VPC_ID=vpc-xxxxxxxx
+export IGW_ID=igw-yyyyyyyy
+export NAT_GW_ID=nat-zzzzzzzz
+export EIP_ALLOC_ID=eipalloc-12345678
+
+# Subnets
+export PUBLIC_SUBNET_1=subnet-aaaaaaa
+export PUBLIC_SUBNET_2=subnet-bbbbbbb
+export PRIVATE_APP_SUBNET_1=subnet-ccccccc
+export PRIVATE_APP_SUBNET_2=subnet-ddddddd
+export PRIVATE_DB_SUBNET_1=subnet-eeeeeee
+export PRIVATE_DB_SUBNET_2=subnet-fffffff
+
+# Other Resources
+export LAUNCH_TEMPLATE_ID=lt-77777777
+export ASG_NAME=wordpress-asg
+~~~
+![wordpress.env](img.1/3.c.wordpress.env.png)
+
+Then source it in your script:
+source wordpress.env
+![Source wordPress.env](img.1/3.d.Source_wordPress.env.png)
+
+## Create Application Load Balancers
+
+1. In the setup-alb.sh file we created earlier, input this bash script.
+
+~~~
+#!/bin/bash
+set -euo pipefail
+
+source wordpress.env
+
+validate_env_vars() {
+  for var in PUBLIC_SUBNET_1 PUBLIC_SUBNET_2 VPC_ID; do
+    if [ -z "${!var:-}" ]; then
+      echo "❌ Error: $var is not set"
+      exit 1
+    fi
+  done
+}
+
+validate_env_vars
+
+# Check if the security group already exists
+EXISTING_SG_ID=$(aws ec2 describe-security-groups \
+  --filters Name=group-name,Values=wordpress-alb-sg Name=vpc-id,Values="$VPC_ID" \
+  --query 'SecurityGroups[0].GroupId' \
+  --output text 2>/dev/null || echo "")
+
+if [ -n "$EXISTING_SG_ID" ] && [ "$EXISTING_SG_ID" != "None" ]; then
+  echo "ℹ️ Security group 'wordpress-alb-sg' already exists. Using existing SG_ID: $EXISTING_SG_ID"
+  SG_ID="$EXISTING_SG_ID"
+else
+  echo "🔧 Creating ALB security group..."
+  SG_ID=$(aws ec2 create-security-group \
+    --group-name wordpress-alb-sg \
+    --description "Security group for WordPress ALB" \
+    --vpc-id "$VPC_ID" \
+    --query 'GroupId' \
+    --output text)
+
+  # Add inbound rules (HTTP and HTTPS)
+  for port in 80 443; do
+    aws ec2 authorize-security-group-ingress \
+      --group-id "$SG_ID" \
+      --protocol tcp \
+      --port "$port" \
+      --cidr 0.0.0.0/0
+  done
+fi
+
+# Create the ALB
+echo "🚀 Creating Application Load Balancer..."
+aws elbv2 create-load-balancer \
+  --name wordpress-alb \
+  --subnets "$PUBLIC_SUBNET_1" "$PUBLIC_SUBNET_2" \
+  --security-groups "$SG_ID" \
+  --scheme internet-facing \
+  --type application
+
+~~~
+
+2. Make it executionable
+~~~
+chmod +x setup-alb.sh
+~~~
+
+3. Run it
+~~~ 
+./setup-alb.sh | less
+~~~
+
+![Create-alb](img.1/3.e.Create-ALB.png)
+
+
+## Create and Attach the Target Group + Listene
+
+### Create New .sh file
+
+~~~ 
+touch setup-listener.sh
+~~~
+
+### Create New Target Group
+~~~
+aws elbv2 create-target-group \
+  --name wordpress-asg-tg \
+  --protocol HTTP \
+  --port 80 \
+  --target-type instance \
+  --vpc-id "$VPC_ID" \
+  --health-check-path "/wp-login.php" \
+  --health-check-protocol HTTP
+~~~
+
+### Create Listener on ALB
+~~~
+# Get ALB ARN
+ALB_ARN=$(aws elbv2 describe-load-balancers \
+  --names wordpress-alb \
+  --query 'LoadBalancers[0].LoadBalancerArn' \
+  --output text)
+
+# Get Target Group ARN
+TG_ARN=$(aws elbv2 describe-target-groups \
+  --names wordpress-asg-tg \
+  --query 'TargetGroups[0].TargetGroupArn' \
+  --output text)
+
+# Create Listener
+aws elbv2 create-listener \
+  --load-balancer-arn "$ALB_ARN" \
+  --protocol HTTP \
+  --port 80 \
+  --default-actions Type=forward,TargetGroupArn="$TG_ARN"
+  ~~~
+
+  ### Attach Target Group to Autoscaling Group
+  ~~~
+  aws autoscaling attach-load-balancer-target-groups \
+  --auto-scaling-group-name "$ASG_NAME" \
+  --target-group-arns "$TG_ARN"
+  ~~~
+
+  ### Overall Script
+  ~~~
+  #!/bin/bash
+set -euo pipefail
+
+source wordpress.env
+
+validate_env_vars() {
+  for var in VPC_ID ASG_NAME; do
+    if [ -z "${!var:-}" ]; then
+      echo "❌ Error: $var is not set"
+      exit 1
+    fi
+  done
+}
+
+validate_env_vars
+
+echo "🔧 Creating Target Group..."
+TG_ARN=$(MSYS_NO_PATHCONV=1 aws elbv2 create-target-group \
+  --name wordpress-asg-tg \
+  --protocol HTTP \
+  --port 80 \
+  --target-type instance \
+  --vpc-id "$VPC_ID" \
+  --health-check-path '/wp-login.php' \
+  --health-check-protocol HTTP \
+  --query 'TargetGroups[0].TargetGroupArn' \
+  --output text)
+
+echo "✅ Target Group created: $TG_ARN"
+
+# Get ALB ARN
+ALB_ARN=$(aws elbv2 describe-load-balancers \
+  --names wordpress-alb \
+  --query 'LoadBalancers[0].LoadBalancerArn' \
+  --output text)
+
+# Create Listener
+echo "🔗 Creating Listener..."
+aws elbv2 create-listener \
+  --load-balancer-arn "$ALB_ARN" \
+  --protocol HTTP \
+  --port 80 \
+  --default-actions Type=forward,TargetGroupArn="$TG_ARN"
+
+echo "✅ Listener created and linked to Target Group"
+
+# Attach Target Group to Auto Scaling Group
+echo "🔗 Attaching Target Group to Auto Scaling Group..."
+aws autoscaling attach-load-balancer-target-groups \
+  --auto-scaling-group-name "$ASG_NAME" \
+  --target-group-arns "$TG_ARN"
+
+echo "✅ Target Group attached to Auto Scaling Group"
+~~~
+
+2. Set Permission to execute
+
+~~~
+chmod +x setup-listener.sh
+~~~
+
+3. Execute the .sh file
+
+~~~ 
+./setup-listener.sh
+~~~
+
+![Create-Listener](img.1/3.f.Create_Listener.png)
