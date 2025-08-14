@@ -741,3 +741,203 @@ chmod +x setup-listener.sh
 ~~~
 
 ![Create-Listener](img.1/3.f.Create_Listener.png)
+
+## Setup Security Group
+
+### Create a new .sh file
+
+~~~ 
+vi setup-security-group.sh
+~~~
+
+### Input this code
+~~~
+#!/bin/bash
+set -euo pipefail
+
+# Region and VPC setup
+REGION="eu-west-2"
+VPC_ID="$(aws ec2 describe-vpcs --region "$REGION" --query 'Vpcs[0].VpcId' --output text)"
+
+# Security group definitions
+declare -A SG_NAMES=(
+  [ALB]="wordpress-alb-sg"
+  [SSH]="wordpress-ssh-sg"
+  [WEB]="wordpress-web-sg"
+  [DB]="wordpress-db-sg"
+  [EFS]="wordpress-efs-sg"
+)
+
+declare -A SG_DESCRIPTIONS=(
+  [ALB]="Allow HTTP/HTTPS traffic to ALB"
+  [SSH]="Allow SSH access"
+  [WEB]="Allow web traffic to EC2"
+  [DB]="Allow MySQL access from web tier"
+  [EFS]="Allow NFS access from web tier"
+)
+
+declare -A SG_IDS
+
+# Create SG if not exists
+create_security_group() {
+  local key="$1"
+  local name="${SG_NAMES[$key]}"
+  local desc="${SG_DESCRIPTIONS[$key]}"
+
+  echo "🔍 Checking for Security Group '$name'..."
+  SG_ID=$(aws ec2 describe-security-groups \
+    --filters Name=group-name,Values="$name" Name=vpc-id,Values="$VPC_ID" \
+    --query 'SecurityGroups[0].GroupId' --output text 2>/dev/null || true)
+
+  if [[ "$SG_ID" == "None" || -z "$SG_ID" ]]; then
+    echo "🛠️  Creating Security Group '$name'..."
+    SG_ID=$(aws ec2 create-security-group \
+      --group-name "$name" \
+      --description "$desc" \
+      --vpc-id "$VPC_ID" \
+      --region "$REGION" \
+      --query 'GroupId' --output text)
+  else
+    echo "ℹ️ Security Group '$name' already exists."
+ fi
+
+  SG_IDS[$key]="$SG_ID"
+}
+
+# Add ingress rule if not duplicate
+authorize_ingress_rule() {
+  local sg_id="$1"
+  local protocol="$2"
+  local port="$3"
+  local cidr="$4"
+
+  echo "🔐 Authorizing ingress: $protocol $port from $cidr on SG $sg_id..."
+
+  aws ec2 authorize-security-group-ingress \
+    --group-id "$sg_id" \
+    --protocol "$protocol" \
+    --port "$port" \
+    --cidr "$cidr" 2>&1 | grep -q "InvalidPermission.Duplicate" && \
+    echo "ℹ️ Rule already exists, skipping." || true
+}
+
+# Main execution
+for key in "${!SG_NAMES[@]}"; do
+  create_security_group "$key"
+done
+
+# Ingress rules
+authorize_ingress_rule "${SG_IDS[ALB]}" "tcp" 80 "0.0.0.0/0"
+authorize_ingress_rule "${SG_IDS[ALB]}" "tcp" 443 "0.0.0.0/0"
+authorize_ingress_rule "${SG_IDS[SSH]}" "tcp" 22 "0.0.0.0/0"
+authorize_ingress_rule "${SG_IDS[WEB]}" "tcp" 80 "0.0.0.0/0"
+authorize_ingress_rule "${SG_IDS[WEB]}" "tcp" 443 "0.0.0.0/0"
+
+# Assume web tier CIDR is internal (adjust as needed)
+WEB_SG_CIDR="10.0.0.0/16"
+authorize_ingress_rule "${SG_IDS[DB]}" "tcp" 3306 "$WEB_SG_CIDR"
+authorize_ingress_rule "${SG_IDS[EFS]}" "tcp" 2049 "$WEB_SG_CIDR"
+
+echo "✅ Security group provisioning complete."
+
+~~~
+
+### Set execute permission
+
+~~~
+chmod +x setup-security-group.sh
+~~~
+
+### Execute .sh file
+
+~~~
+./seup-security-group.sh
+~~~
+
+![Create Security Group](img.1/3.g.Create-security-group.png)
+
+##  Provision Amazon RDS (MySQL)
+
+1. Create an .sh file
+
+~~~
+vi setup-rds.sh
+~~~
+
+2. Input this code in the .sh file
+
+~~~
+#!/bin/bash
+set -euo pipefail
+
+source wordpress.env
+
+# Validate required environment variables
+validate_env_vars() {
+  for var in PRIVATE_DB_SUBNET_1 PRIVATE_DB_SUBNET_2 VPC_ID DB_SG_ID; do
+    if [ -z "${!var:-}" ]; then
+      echo "❌ Error: $var is not set in wordpress.env"
+      exit 1
+    fi
+  done
+}
+
+validate_env_vars
+
+# Check if DB Subnet Group exists
+SUBNET_GROUP_NAME="wordpress-db-subnet-group"
+EXISTING_SUBNET_GROUP=$(aws rds describe-db-subnet-groups \
+  --query "DBSubnetGroups[?DBSubnetGroupName=='$SUBNET_GROUP_NAME'].DBSubnetGroupName" \
+  --output text)
+
+if [ "$EXISTING_SUBNET_GROUP" == "$SUBNET_GROUP_NAME" ]; then
+  echo "ℹ️ DB Subnet Group '$SUBNET_GROUP_NAME' already exists. Skipping creation."
+else
+  echo "🔧 Creating DB Subnet Group..."
+  aws rds create-db-subnet-group \
+    --db-subnet-group-name "$SUBNET_GROUP_NAME" \
+    --db-subnet-group-description "Subnet group for WordPress RDS" \
+    --subnet-ids "$PRIVATE_DB_SUBNET_1" "$PRIVATE_DB_SUBNET_2"
+  echo "✅ DB Subnet Group created."
+fi
+
+# Check if RDS instance already exists
+DB_IDENTIFIER="wordpress-db"
+EXISTING_DB=$(aws rds describe-db-instances \
+  --query "DBInstances[?DBInstanceIdentifier=='$DB_IDENTIFIER'].DBInstanceIdentifier" \
+  --output text)
+
+if [ "$EXISTING_DB" == "$DB_IDENTIFIER" ]; then
+  echo "ℹ️ RDS instance '$DB_IDENTIFIER' already exists. Skipping creation."
+else
+  echo "🚀 Creating RDS instance '$DB_IDENTIFIER'..."
+aws rds create-db-instance \
+    --db-instance-identifier "$DB_IDENTIFIER" \
+    --db-instance-class db.t3.micro \
+ --engine mysql \
+    --master-username admin \
+    --master-user-password YourSecurePassword123 \
+    --allocated-storage 20 \
+    --vpc-security-group-ids "$DB_SG_ID" \
+    --db-subnet-group-name "$SUBNET_GROUP_NAME" \
+    --multi-az \
+    --backup-retention-period 7
+  echo "✅ RDS instance creation initiated."
+fi
+
+  ~~~
+
+  3. Set execute permissions
+
+  ~~~
+  chmod +x setup-rds.sh
+  ~~~
+
+  4. Execute the .sh file
+
+    ~~~
+    ./setup-rds.sh | less
+    ~~~
+
+![Create RDS](img.1/3.h.create-RDS.png)
+
