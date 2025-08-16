@@ -796,22 +796,27 @@ create_security_group() {
   local name="${SG_NAMES[$key]}"
   local desc="${SG_DESCRIPTIONS[$key]}"
 
-  echo "🔍 Checking for Security Group '$name'..."
-  SG_ID=$(aws ec2 describe-security-groups \
-    --filters Name=group-name,Values="$name" Name=vpc-id,Values="$VPC_ID" \
-    --query 'SecurityGroups[0].GroupId' --output text 2>/dev/null || true)
+  echo "🔍 Checking for Security Group '$name' in VPC '$VPC_ID'..."
 
-  if [[ "$SG_ID" == "None" || -z "$SG_ID" ]]; then
-    echo "🛠️  Creating Security Group '$name'..."
+  SG_ID=$(aws ec2 describe-security-groups \
+    --region "$REGION" \
+    --filters Name=group-name,Values="$name" Name=vpc-id,Values="$VPC_ID" \
+    --query 'SecurityGroups[0].GroupId' \
+    --output text 2>/dev/null || echo "")
+
+  if [[ -n "$SG_ID" && "$SG_ID" != "None" ]]; then
+    echo "ℹ️ Security Group '$name' already exists. Using SG_ID: $SG_ID"
+  else
+    echo "🛠️ Creating Security Group '$name'..."
     SG_ID=$(aws ec2 create-security-group \
       --group-name "$name" \
       --description "$desc" \
       --vpc-id "$VPC_ID" \
       --region "$REGION" \
-      --query 'GroupId' --output text)
-  else
-    echo "ℹ️ Security Group '$name' already exists."
- fi
+      --query 'GroupId' \
+      --output text)
+    echo "✅ Created Security Group '$name' with ID: $SG_ID"
+  fi
 
   SG_IDS[$key]="$SG_ID"
 }
@@ -825,12 +830,19 @@ authorize_ingress_rule() {
 
   echo "🔐 Authorizing ingress: $protocol $port from $cidr on SG $sg_id..."
 
-  aws ec2 authorize-security-group-ingress \
+  output=$(aws ec2 authorize-security-group-ingress \
     --group-id "$sg_id" \
     --protocol "$protocol" \
     --port "$port" \
-    --cidr "$cidr" 2>&1 | grep -q "InvalidPermission.Duplicate" && \
-    echo "ℹ️ Rule already exists, skipping." || true
+    --cidr "$cidr" 2>&1)
+
+  if echo "$output" | grep -q "InvalidPermission.Duplicate"; then
+    echo "ℹ️ Rule already exists, skipping."
+  elif echo "$output" | grep -q "error"; then
+    echo "❌ Error adding rule: $output"
+  else
+    echo "✅ Rule added: $protocol $port from $cidr"
+  fi
 }
 
 # Main execution
@@ -974,3 +986,43 @@ wordpress-db.csrgcouua1xy.us-east-1.rds.amazonaws.com
 ~~~
 ssh -i your-key.pem ec2-user@<bastion-public-ip>
 ~~~
+
+
+![SSH to Bastion](img.1/4.b.SSH_to_bastion.png)
+3. Run this command
+~~~
+aws ec2 describe-instances \
+  --region "$AWS_REGION" \
+  --filters "Name=vpc-id,Values=$VPC_ID" \
+  --query 'Reservations[*].Instances[*].[InstanceId,PrivateIpAddress,SubnetId]' \
+  --output table
+
+~~~
+
+This gives information on the private IP of the instance
+
+![Describe Instance](img.1/4.a.Describe_instance.png)
+
+4. Transfer PEM File to Bastion Host
+
+From your Windows machine, use  to copy the PEM file to the Bastion Host:
+~~~
+scp -i WordPress.pem WordPress.pem ec2-user@<Bastion-IP>:/home/ec2-user/
+~~~
+
+Replace <Bastion-IP>  with the public IP of your Bastion Host
+
+5. SSH from Bastion to WordPress EC2
+
+Once the PEM file is on the Bastion Host:
+~~~
+chmod 400 WordPress.pem
+ssh -i WordPress.pem ec2-user@10.0.4.94
+~~~
+
+
+~~~
+ssh ec2-user@<private-ip>
+~~~
+
+
