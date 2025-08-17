@@ -965,7 +965,110 @@ fi
 
 ![Create RDS](img.1/3.h.create-RDS.png)
 
-## Configure WordPress to Use RDS
+## Set Up EFS
+~~~
+#!/bin/bash
+set -euo pipefail
+
+# === Load Environment ===
+source wordpress.env
+
+# === Config ===
+REGION="${AWS_REGION:-us-east-1}"
+EFS_NAME="${EFS_NAME:-Digitalboost-efs}"
+SECURITY_GROUP_ID="${DB_SG_ID}"  # Or use a dedicated SG for EFS
+MOUNT_POINT="${MOUNT_POINT:-/mnt/efs}"
+
+
+# === Subnet Array ===
+SUBNET_IDS=(
+  "$PRIVATE_APP_SUBNET_1"
+  "$PRIVATE_APP_SUBNET_2"
+  "$PRIVATE_DB_SUBNET_1"
+  "$PRIVATE_DB_SUBNET_2"
+)
+
+# === Functions ===
+
+create_efs() {
+  echo "Creating EFS file system..." >&2
+  local token="${EFS_NAME}-$(date +%s)"
+  local fs_id
+  fs_id=$(aws efs create-file-system \
+    --creation-token "$token" \
+    --performance-mode generalPurpose \
+    --throughput-mode bursting \
+    --tags Key=Name,Value="$EFS_NAME" \
+    --region "$REGION" \
+    --query 'FileSystemId' --output text)
+  echo "EFS created: $fs_id" >&2
+  echo "$fs_id"
+}
+
+wait_for_efs() {
+  local fs_id="$1"
+  echo "Waiting for EFS $fs_id to become available..."
+
+  local attempts=0
+  local max_attempts=30  # ~2.5 minutes
+
+  while [[ $attempts -lt $max_attempts ]]; do
+    local status
+    status=$(aws efs describe-file-systems \
+      --file-system-id "$fs_id" \
+      --region "$REGION" \
+      --query 'FileSystems[0].LifeCycleState' \
+      --output text)
+
+    echo "Current status: $status"
+
+    if [[ "$status" == "available" ]]; then
+      echo "EFS $fs_id is now available."
+      return 0
+    fi
+
+    ((attempts++))
+    sleep 5
+  done
+
+  echo "Timeout: EFS $fs_id did not become available after $((max_attempts * 5)) seconds."
+  return 1
+}
+
+create_mount_targets() {
+  local fs_id="$1"
+  echo " Creating mount targets for EFS $fs_id..."
+
+  for subnet_id in "${SUBNET_IDS[@]}"; do
+    echo "Subnet: $subnet_id"
+    aws efs create-mount-target \
+      --file-system-id "$fs_id" \
+      --subnet-id "$subnet_id" \
+      --security-groups "$SECURITY_GROUP_ID" \
+      --region "$REGION"
+  done
+
+  echo "All mount targets created."
+}
+
+
+
+# === Main ===
+main() {
+  echo "Starting EFS provisioning..."
+  local fs_id
+  fs_id=$(create_efs)
+  wait_for_efs "$fs_id"
+  create_mount_targets "$fs_id"
+  echo "EFS setup complete."
+}
+
+main "$@"
+~~~
+
+![set-up_efs](img.1/3.i.setup-efs.png)
+
+## Connecting to ALB EC2 instance
 
 1. Retrieve the RDS Endpoint
 
@@ -1007,10 +1110,12 @@ This gives information on the private IP of the instance
 
 From your Windows machine, use  to copy the PEM file to the Bastion Host:
 ~~~
-scp -i WordPress.pem WordPress.pem ec2-user@<Bastion-IP>:/home/ec2-user/
+scp -i /WordPress.pem WordPress.pem ec2-user@<Bastion-IP>:/home/ec2-user/
 ~~~
 
 Replace <Bastion-IP>  with the public IP of your Bastion Host
+
+> Note that it is important to do this in the local environment 
 
 5. SSH from Bastion to WordPress EC2
 
@@ -1019,10 +1124,29 @@ Once the PEM file is on the Bastion Host:
 chmod 400 WordPress.pem
 ssh -i WordPress.pem ec2-user@10.0.4.94
 ~~~
+![SSh to Wordpress](img.1/4.c.SSH-to_wordpress.png)
 
+
+I used the script from https://github.com/dareyio/script-2 to configure my instance but make sure to configure using your FS id
+
+
+## Configure WordPress to Use RDS
+1. Edit wp-config.php
 
 ~~~
-ssh ec2-user@<private-ip>
+nano /var/www/html/wp-config.php
 ~~~
 
+2. Input this:
+![RDS Config](img.1/4.d.RDS_Config.png)
 
+
+3. ![SSL](img.1/4.e.SSL.png)
+
+
+4. Restart apache
+~~~
+sudo systemctl restart httpd
+~~~
+
+Now we can Try to go to our site
